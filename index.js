@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const fileUpload = require('express-fileupload');
 const fs = require('fs-extra');
 const MongoClient = require('mongodb').MongoClient;
+const ObjectID = require('mongodb').ObjectID;
 
 require('dotenv').config()
 
@@ -18,13 +19,9 @@ app.use(fileUpload());
 const port = 5000
 
 
-
-
-
-
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 client.connect(err => {
-    const collection = client.db("creativeAgency").collection("agency");
+    const collection = client.db("creativeAgency").collection("orders");
     const serviceCollection = client.db("creativeAgency").collection("service");
     const reviewCollection = client.db("creativeAgency").collection("review");
     const adminCollection = client.db("creativeAgency").collection("admin");
@@ -58,6 +55,7 @@ client.connect(err => {
     app.post('/placeService', (req, res) => {
         const file = req.files.file;
         const image = req.body.image;
+        const status = req.body.status;
         const name = req.body.name;
         const email = req.body.email;
         const price = req.body.price;
@@ -71,7 +69,7 @@ client.connect(err => {
             img: Buffer.from(encImg, 'base64')
         }
 
-        collection.insertOne({ name, email, price, service, description, image, img })
+        collection.insertOne({ name, email, price, service, description, image, img, status })
             .then(result => {
                 console.log(result);
                 res.send(result.insertedCount > 0)
@@ -82,6 +80,7 @@ client.connect(err => {
     //post method for review;
     app.post('/review', (req, res) => {
         const name = req.body.name;
+        const newFile = req.body.newFile;
         const description = req.body.description;
         const designation = req.body.designation;
         const newImg = req.files.file.data;
@@ -91,8 +90,7 @@ client.connect(err => {
             size: req.files.file.size,
             img: Buffer.from(encImg, 'base64')
         }
-        // console.log(name, description, designation, img);
-        reviewCollection.insertOne({ name, description, designation, img })
+        reviewCollection.insertOne({ name, description, designation, img, newFile })
             .then(result => {
                 console.log(result);
                 res.send(result)
@@ -110,7 +108,6 @@ client.connect(err => {
                 res.send(result)
             })
     })
-
 
 
     //get method for review
@@ -147,33 +144,6 @@ client.connect(err => {
     })
 
 
-    // app.get('/orders', (req, res) => {
-    //     ordersCollection.find({})
-    //     .toArray((err, documents) => {
-    //       res.send(documents)
-    //     })
-    //   })
-
-    /////////////////////////////
-
-
-    // app.post('/admin', (req, res) => {
-    //     const email = req.body.email;
-    //     adminCollection.find({ email: email })
-    //         .toArray((err, collection) => {
-    //             if (collection) {
-    //                 res.send(collection)
-    //             }
-    //         })
-
-
-    // })
-    // app.get('/admin', (req, res) => {
-    //     adminCollection.find({ email: req.query.email })
-    //         .toArray((err, collection) => {
-    //             res.send(collection)
-    //         })
-    // })
 
 
     app.get('/admin', (req, res) => {
@@ -186,38 +156,20 @@ client.connect(err => {
             })
 
     })
-    // adminCollection.find({ email })
 
-    // .toArray((err, admin) => {
-    //     if (email === admin[0].email) {
-    //         return res.send(admin[0].email);
-    //         // console.log("admin", documents[0].email);
-    //     }
+    //patch method;
+    app.patch("/updateSurviceById/:id", (req, res) => {
 
-    // })
+        collection.updateOne({ _id: ObjectID(req.params.id) }, {
+            $set: { status: req.body.status }
+        })
+            .then(result => {
 
-
-    // collection.find({ email })
-    //     .toArray((err, user) => {
-    //         // console.log(err, user);
-    //         console.log(user[0].email);
-    //         res.send(user[0].email)
-    //     })
+                res.send(result.modifiedCount > 0)
+            })
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+    })
 
 
 });
