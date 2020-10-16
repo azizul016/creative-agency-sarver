@@ -71,7 +71,6 @@ client.connect(err => {
 
         collection.insertOne({ name, email, price, service, description, image, img, status })
             .then(result => {
-                console.log(result);
                 res.send(result.insertedCount > 0)
             })
 
@@ -101,7 +100,6 @@ client.connect(err => {
     app.post('/setAdmin', (req, res) => {
         const email = req.body.email;
         const pass = req.body.password;
-        console.log(email);
         adminCollection.insertOne({ email, pass })
             .then(result => {
                 console.log(result);
@@ -148,7 +146,6 @@ client.connect(err => {
 
     app.get('/admin', (req, res) => {
         const email = req.query.email;
-        console.log(email);
 
         adminCollection.find({ email })
             .toArray((err, collection) => {
