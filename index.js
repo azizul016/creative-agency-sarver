@@ -32,7 +32,6 @@ client.connect(err => {
     app.post('/addAdmin', (req, res) => {
         // const file = req.files.file;
         const title = req.body.title;
-        const price = req.body.price;
         const description = req.body.description;
         const newImg = req.files.file.data;
         const encImg = newImg.toString('base64');
@@ -42,7 +41,7 @@ client.connect(err => {
             img: Buffer.from(encImg, 'base64')
         }
 
-        serviceCollection.insertOne({ title, description, image, price })
+        serviceCollection.insertOne({ title, description, image })
             .then(result => {
                 res.send(result.insertedCount > 0)
             })
